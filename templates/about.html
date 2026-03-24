@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+
+{% block title %}About - User Manager{% endblock %}
+
+{% block content %}
+
+    <div class="about-section">
+        <h1>About This Project</h1>
+        <p>This is a simple Flask CRUD (Create, Read, Delete) application designed to demonstrate the basics of web development with Python.</p>
+        
+        <h3>Features included:</h3>
+        <ul>
+            <li>Dynamic Routing</li>
+            <li>Jinja2 Template Inheritance</li>
+            <li>Static File Handling (CSS)</li>
+            <li>Form Data Processing</li>
+        </ul>
+
+        <a href="{{ url_for('index') }}" class="btn-add" style="text-decoration: none; display: inline-block;">Back to Home</a>
+    </div>
+{% endblock %}

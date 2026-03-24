@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+
+{% block title %}Profile - {{ user.name }}{% endblock %}
+
+{% block content %}
+{% if user %}
+<div class="profile-card">
+    <h1>User Profile</h1>
+    <hr>
+    <p><strong>Name:</strong> {{ user.name }}</p>
+    <p><strong>Age:</strong> {{ user.age }}</p>
+    <p><strong>Job:</strong> {{ user.job }}</p>
+    
+    <div style="margin-top: 20px;">
+        <a href="{{ url_for('index') }}" class="btn-add" style="text-decoration: none;">&larr; Back to List</a>
+    </div>
+{% else %}
+<h1>Invalid user index</h1>
+{% endif %}
+</div>
+
+<style>
+    
+</style>
+{% endblock %}
