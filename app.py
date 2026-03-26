@@ -15,10 +15,12 @@ DEFAULT_USERS = [
 
 @app.route("/", methods=["GET", "POST"])
 def index():
-    # print(undefined)
     if 'users' not in session:
         session['users'] = DEFAULT_USERS.copy()
-    
+    print("FORM DATA START")
+    from pprint import pprint
+    pprint(list(request.form.items()))
+    print("FORM DATA END")
     if request.method == "POST":
         # Get data from the form fields
         name = request.form.get("name")
@@ -30,7 +32,7 @@ def index():
             users_list.append({"name": name, "age": int(age), "job": job})
             session['users'] = users_list
     
-    return render_template("indexa.html", users=session['users'])
+    return render_template("index.html", users=session['users'])
 
 
 # New route to handle deletion
@@ -84,4 +86,4 @@ def about():
 
 if __name__ == "__main__":
     app.run(debug=True)
-    debug_flag = str(os.environ.get("DEBUG", "False")).lower() in ("1", "true", "yes")
+    # debug_flag = str(os.environ.get("DEBUG", "False")).lower() in ("1", "true", "yes")
