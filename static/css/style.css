@@ -85,9 +85,22 @@ input {
   cursor: pointer;
 }
 .btn-delete {
-  color: var(--danger);
-  text-decoration: none;
+  background: var(--danger);
+  color: white;
+  border: none;
+  padding: 5px 10px;
+  border-radius: 4px;
+  cursor: pointer;
   font-weight: bold;
+}
+
+.btn-edit {
+  background: #2563eb;
+  color: white;
+  padding: 5px 10px;
+  border-radius: 4px;
+  text-decoration: none;
+  margin-right: 8px;
 }
 
 .profile-card {
@@ -98,4 +111,44 @@ input {
   max-width: 400px;
   margin: 20px auto;
   text-align: center;
+}
+
+/* Modal Styles */
+.modal {
+  display: none;
+  position: fixed;
+  z-index: 1;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.4);
+}
+
+.modal-content {
+  background-color: #fefefe;
+  margin: 15% auto;
+  padding: 20px;
+  border: 1px solid #888;
+  width: 80%;
+  max-width: 300px;
+  text-align: center;
+  border-radius: 8px;
+}
+
+.modal-content button {
+  margin: 10px;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.modal-content button:first-of-type {
+  background: #ccc;
+}
+
+.modal-content button:last-of-type {
+  background: var(--danger);
+  color: white;
 }

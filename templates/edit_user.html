@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+
+{% block title %}Edit User - {{ user.name }}{% endblock %}
+
+{% block content %}
+{% if user %}
+<div class="form-container">
+  <h1>Edit User</h1>
+  <form action="{{ url_for('update_user', user_index=user_index) }}" method="POST">
+    <input type="text" name="name" value="{{ user.name }}" placeholder="Enter Name" required />
+    <input type="number" name="age" value="{{ user.age }}" placeholder="Enter Age" required />
+    <input type="text" name="job" value="{{ user.job }}" placeholder="Enter Job" />
+    <button type="submit" class="btn-add">Save</button>
+  </form>
+  <div style="margin-top: 12px;">
+    <a href="{{ url_for('index') }}">Cancel</a>
+  </div>
+</div>
+{% else %}
+<h1>User not found</h1>
+<a href="{{ url_for('index') }}">Back to list</a>
+{% endif %}
+{% endblock %}
