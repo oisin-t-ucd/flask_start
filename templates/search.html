@@ -1,0 +1,119 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+    <h1>Search Users</h1>
+    
+    <!-- Search Form using GET query parameters -->
+    <div style="background-color: #f5f5f5; padding: 20px; border-radius: 8px; margin-bottom: 30px;">
+        <h3>Filter Users</h3>
+        <form method="GET" action="{{ url_for('search') }}">
+            <div style="margin-bottom: 15px;">
+                <label for="name">Search by Name:</label><br>
+                <input type="text" id="name" name="name" placeholder="e.g., John" 
+                       value="{{ search_params.get('name', '') }}" style="padding: 8px; width: 250px;">
+                <small style="display: block; margin-top: 5px; color: #666;">
+                    Tip: Uses substring matching (case-insensitive)
+                </small>
+            </div>
+            
+            <div style="margin-bottom: 15px;">
+                <label for="job">Filter by Job:</label><br>
+                <select id="job" name="job" style="padding: 8px;">
+                    <option value="">-- All Jobs --</option>
+                    <option value="Teacher" {% if search_params.get('job') == 'Teacher' %}selected{% endif %}>Teacher</option>
+                    <option value="Doctor" {% if search_params.get('job') == 'Doctor' %}selected{% endif %}>Doctor</option>
+                    <option value="Engineer" {% if search_params.get('job') == 'Engineer' %}selected{% endif %}>Engineer</option>
+                </select>
+            </div>
+            
+            <div style="margin-bottom: 15px;">
+                <label for="index">Get by Index:</label><br>
+                <input type="number" id="index" name="index" placeholder="e.g., 0, 1, 2" 
+                       value="{{ search_params.get('index', '') }}" style="padding: 8px; width: 250px;">
+                <small style="display: block; margin-top: 5px; color: #666;">
+                    Tip: Get a specific user by their position (0-based index)
+                </small>
+            </div>
+            
+            <button type="submit" style="padding: 10px 20px; background-color: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer;">
+                Search
+            </button>
+            <a href="{{ url_for('search') }}" style="margin-left: 10px; padding: 10px 20px; background-color: #6c757d; color: white; text-decoration: none; border-radius: 4px;">
+                Clear
+            </a>
+        </form>
+    </div>
+
+    <!-- Search Results -->
+    <div>
+        <h2>Results ({{ filtered_users|length }} of {{ total_users }} users)</h2>
+        
+        {% if search_params %}
+        <p style="margin-bottom: 20px; color: #666;">
+            <strong>Applied filters:</strong>
+            {% if search_params.get('name') %}<code>name contains "{{ search_params['name'] }}"</code>{% endif %}
+            {% if search_params.get('job') %}<code>job = "{{ search_params['job'] }}"</code>{% endif %}
+            {% if search_params.get('index') %}<code>index = {{ search_params['index'] }}</code>{% endif %}
+        </p>
+        {% endif %}
+
+        {% if filtered_users %}
+            <table style="width: 100%; border-collapse: collapse; margin-top: 20px;">
+                <thead>
+                    <tr style="background-color: #f0f0f0;">
+                        <th style="border: 1px solid #ddd; padding: 12px; text-align: left;">Name</th>
+                        <th style="border: 1px solid #ddd; padding: 12px; text-align: left;">Age</th>
+                        <th style="border: 1px solid #ddd; padding: 12px; text-align: left;">Job</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for user in filtered_users %}
+                    <tr>
+                        <td style="border: 1px solid #ddd; padding: 12px;">{{ user.name }}</td>
+                        <td style="border: 1px solid #ddd; padding: 12px;">{{ user.age }}</td>
+                        <td style="border: 1px solid #ddd; padding: 12px;">{{ user.job }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p style="color: #d9534f; margin-top: 20px;">
+                No users found matching your search criteria.
+            </p>
+        {% endif %}
+    </div>
+
+    <!-- Query Parameter Examples -->
+    <div style="background-color: #e8f4f8; padding: 20px; border-radius: 8px; margin-top: 30px;">
+        <h3>URL Query Parameter Examples</h3>
+        <p><strong>How to use GET query parameters directly in the URL:</strong></p>
+        <ul style="list-style-type: none; padding: 0;">
+            <li style="margin-bottom: 8px;">
+                <a href="{{ url_for('search', name='John') }}" style="color: #007bff; text-decoration: none;">
+                    <code>/search?name=John</code>
+                </a> - Search for users with "John" in their name
+            </li>
+            <li style="margin-bottom: 8px;">
+                <a href="{{ url_for('search', job='Doctor') }}" style="color: #007bff; text-decoration: none;">
+                    <code>/search?job=Doctor</code>
+                </a> - Filter by job title
+            </li>
+            <li style="margin-bottom: 8px;">
+                <a href="{{ url_for('search', index='0') }}" style="color: #007bff; text-decoration: none;">
+                    <code>/search?index=0</code>
+                </a> - Get user at index 0
+            </li>
+            <li style="margin-bottom: 8px;">
+                <a href="{{ url_for('search', name='ja', job='Doctor') }}" style="color: #007bff; text-decoration: none;">
+                    <code>/search?name=ja&job=Doctor</code>
+                </a> - Combine multiple filters
+            </li>
+        </ul>
+    </div>
+
+    <div style="margin-top: 20px;">
+        <a href="{{ url_for('index') }}" style="color: #007bff; text-decoration: none;">← Back to Home</a>
+    </div>
+</div>
+{% endblock %}

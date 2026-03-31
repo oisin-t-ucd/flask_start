@@ -3,6 +3,12 @@
 {% block content %}
 <h1>User Directory</h1>
 
+<div style="margin-bottom: 20px;">
+  <a href="{{ url_for('search') }}" class="btn-edit" style="display: inline-block; padding: 10px 15px; background-color: #28a745; color: white; text-decoration: none; border-radius: 4px;">
+    🔍 Search/Filter Users
+  </a>
+</div>
+
 <div class="form-container">
   <form action="/" method="POST">
     <input type="text" name="name" placeholder="Enter Name" required />

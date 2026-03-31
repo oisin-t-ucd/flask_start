@@ -78,6 +78,58 @@ def update_user(user_index):
     return redirect(url_for('index'))
 
 
+@app.route("/search")
+def search():
+    
+    if 'users' not in session:
+        session['users'] = DEFAULT_USERS.copy()
+    
+    users_list = session['users']
+    filtered_users = users_list.copy()
+    search_params = {"name": "john"}
+    
+    # Get query parameters using request.args.get()
+    name_filter = request.args.get('name', '').strip()
+    job_filter = request.args.get('job', '').strip()
+    index_param = request.args.get('index', '').strip()
+    
+    # Store search parameters for display in template
+    if name_filter:
+        search_params['name'] = name_filter
+        filtered_users = [u for u in filtered_users if name_filter.lower() in u['name'].lower()]
+
+        # loop to achieve the same result as the list comprehension above
+        # this has the same effect, just a few extra lines
+        # after_name_filter = []
+        # for user in filtered_users:
+        #     if name_filter.lower() in user["name"].lower():
+        #         after_name_filter.append(user)
+        # filtered_users = after_name_filter
+    
+    if job_filter:
+        search_params['job'] = job_filter
+        filtered_users = [u for u in filtered_users if u['job'].lower() == job_filter.lower()]
+    
+    # Get specific user by index
+    if index_param:
+        try:
+            index = int(index_param)
+            if 0 <= index < len(users_list):
+                search_params['index'] = index
+                filtered_users = [users_list[index]]
+            else:
+                filtered_users = []
+        except ValueError:
+            filtered_users = []
+    
+    return render_template(
+        "search.html",
+        filtered_users=filtered_users,
+        search_params=search_params,
+        total_users=len(users_list)
+    )
+
+
 @app.route("/about")
 def about():
     return render_template("about.html")
