@@ -54,18 +54,21 @@ body {
   margin-bottom: 20px;
 }
 
-input {
+input,
+select {
   padding: 10px;
   border: 1px solid #ddd;
   border-radius: 4px;
   margin-right: 10px;
 }
 
+.todo-list,
 .user-list {
   list-style: none;
   padding: 0;
 }
 
+.todo-list li,
 .user-list li {
   background: #fff;
   padding: 15px;

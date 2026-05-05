@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+
+{% block title %}Edit Task - {{ todo.task }}{% endblock %}
+
+{% block content %}
+{% if todo %}
+<div class="form-container">
+  <h1>Edit Task</h1>
+  <form action="{{ url_for('update_todo', todo_index=todo_index) }}" method="POST">
+    <input type="text" name="task" value="{{ todo.task }}" placeholder="Enter Task" required />
+    <select name="priority" required>
+      <option value="High" {% if todo.priority == 'High' %}selected{% endif %}>High</option>
+      <option value="Medium" {% if todo.priority == 'Medium' %}selected{% endif %}>Medium</option>
+      <option value="Low" {% if todo.priority == 'Low' %}selected{% endif %}>Low</option>
+    </select>
+    <select name="status" required>
+      <option value="Pending" {% if todo.status == 'Pending' %}selected{% endif %}>Pending</option>
+      <option value="In Progress" {% if todo.status == 'In Progress' %}selected{% endif %}>In Progress</option>
+      <option value="Completed" {% if todo.status == 'Completed' %}selected{% endif %}>Completed</option>
+    </select>
+    <select name="category_id" required>
+      {% for category in categories %}
+      <option value="{{ category.id }}" {% if todo.category_id == category.id %}selected{% endif %}>{{ category.name }}</option>
+      {% endfor %}
+    </select>
+    <button type="submit" class="btn-add">Save</button>
+  </form>
+  <div style="margin-top: 12px;">
+    <a href="{{ url_for('index') }}">Cancel</a>
+  </div>
+</div>
+{% else %}
+<h1>Task not found</h1>
+<a href="{{ url_for('index') }}">Back to list</a>
+{% endif %}
+{% endblock %}

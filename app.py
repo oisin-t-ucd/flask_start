@@ -1,142 +1,138 @@
 import os
 from dotenv import load_dotenv
-from flask import Flask, render_template, request, redirect, url_for, session
+from flask import Flask, render_template, request, redirect, url_for, flash
+from models import db, Task, Category
 
 load_dotenv()
 
 app = Flask(__name__)
+app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY", "SECRET_KEY")
+app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get("DATABASE_URL", "sqlite:///todos.db")
+app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
-# This line is only required if you're using sessions
-app.secret_key = os.environ.get("SECRET_KEY", "SECRET_KEY")
-
-DEFAULT_USERS = [
-    {"name": "John", "age": 100, "job": "Teacher"},
-    {"name": "Jane", "age": 100, "job": "Doctor"},
-    {"name": "Dave", "age": 100, "job": "Engineer"},
-]
+db.init_app(app)
+with app.app_context():
+    db.create_all()
+    if Category.query.count() == 0:
+        default_categories = ["Personal", "Work", "Home", "Urgent"]
+        for name in default_categories:
+            db.session.add(Category(name=name))
+        db.session.commit()
 
 @app.route("/", methods=["GET", "POST"])
 def index():
-    if 'users' not in session:
-        session['users'] = DEFAULT_USERS.copy()
+    categories = Category.query.order_by(Category.name).all()
+
     if request.method == "POST":
-        # Get data from the form fields
-        name = request.form.get("name")
-        age = request.form.get("age")
-        job = request.form.get("job")
-        
-        if name and age:
-            users_list = session['users']
-            users_list.append({"name": name, "age": int(age), "job": job})
-            session['users'] = users_list
-    
-    return render_template("index.html", users=session['users'])
+        task = request.form.get("task")
+        priority = request.form.get("priority")
+        status = request.form.get("status")
+        category_id = request.form.get("category_id")
 
+        category = Category.query.get(category_id) if category_id else None
+        if task and priority and category:
+            new_task = Task(task=task, priority=priority, status=status, category=category)
+            db.session.add(new_task)
+            db.session.commit()
+            flash("Task added successfully.")
+        else:
+            flash("Please provide a task, priority, and valid category.")
 
-# New route to handle deletion
-@app.route("/delete/<int:user_index>", methods=["POST"])
-def delete_user(user_index):
-    if 'users' in session and 0 <= user_index < len(session['users']):
-        users_list = session['users']
-        users_list.pop(user_index)
-        session['users'] = users_list
+    todos = Task.query.order_by(Task.id).all()
+    return render_template("index.html", todos=todos, categories=categories)
+
+@app.route("/delete/<int:todo_index>", methods=["POST"])
+def delete_todo(todo_index):
+    todo = Task.query.get(todo_index)
+    if todo:
+        db.session.delete(todo)
+        db.session.commit()
+        flash("Task deleted successfully.")
     return redirect(url_for("index"))
 
+@app.route("/edit/<int:todo_index>")
+def edit_todo(todo_index):
+    todo = Task.query.get(todo_index)
+    if not todo:
+        return redirect(url_for('index'))
 
-@app.route("/<int:user_index>")
-def user_profile(user_index):
-    if 'users' in session and 0 <= user_index < len(session['users']):
-        user = session['users'][user_index]
+    categories = Category.query.order_by(Category.name).all()
+    return render_template('edit_todo.html', todo=todo, todo_index=todo_index, categories=categories)
+
+@app.route("/update/<int:todo_index>", methods=["POST"])
+def update_todo(todo_index):
+    todo = Task.query.get(todo_index)
+    if not todo:
+        return redirect(url_for('index'))
+
+    task = request.form.get('task')
+    priority = request.form.get('priority')
+    status = request.form.get('status')
+    category_id = request.form.get('category_id')
+
+    category = Category.query.get(category_id) if category_id else None
+    if task and priority and category:
+        todo.task = task
+        todo.priority = priority
+        todo.status = status
+        todo.category = category
+        db.session.commit()
+        flash("Task updated successfully.")
     else:
-        user = None
-    return render_template("user_profile.html", user=user)
-
-
-@app.route("/edit/<int:user_index>")
-def edit_user(user_index):
-    if 'users' not in session or not (0 <= user_index < len(session['users'])):
-        return redirect(url_for('index'))
-
-    user = session['users'][user_index]
-    return render_template('edit_user.html', user=user, user_index=user_index)
-
-
-@app.route("/update/<int:user_index>", methods=["POST"])
-def update_user(user_index):
-    if 'users' not in session or not (0 <= user_index < len(session['users'])):
-        return redirect(url_for('index'))
-
-    name = request.form.get('name')
-    age = request.form.get('age')
-    job = request.form.get('job')
-
-    if name and age:
-        users_list = session['users']
-        users_list[user_index] = {"name": name, "age": int(age), "job": job}
-        session['users'] = users_list
+        flash("Please provide a valid category when updating the task.")
 
     return redirect(url_for('index'))
 
+@app.route("/todo/<int:todo_index>")
+def todo_detail(todo_index):
+    todo = Task.query.get(todo_index)
+    if not todo:
+        return redirect(url_for('index'))
+
+    return render_template('todo_detail.html', todo=todo, todo_index=todo_index)
 
 @app.route("/search")
 def search():
-    
-    if 'users' not in session:
-        session['users'] = DEFAULT_USERS.copy()
-    
-    users_list = session['users']
-    filtered_users = users_list.copy()
-    search_params = {"name": "john"}
-    
-    # Get query parameters using request.args.get()
-    name_filter = request.args.get('name', '').strip()
-    job_filter = request.args.get('job', '').strip()
-    index_param = request.args.get('index', '').strip()
-    
-    # Store search parameters for display in template
-    if name_filter:
-        search_params['name'] = name_filter
-        filtered_users = [u for u in filtered_users if name_filter.lower() in u['name'].lower()]
+    categories = Category.query.order_by(Category.name).all()
+    search_params = {
+        'task': request.args.get('task', '').strip(),
+        'priority': request.args.get('priority', '').strip(),
+        'category_id': request.args.get('category_id', '').strip(),
+        'index': request.args.get('index', '').strip(),
+    }
 
-        # loop to achieve the same result as the list comprehension above
-        # this has the same effect, just a few extra lines
-        # after_name_filter = []
-        # for user in filtered_users:
-        #     if name_filter.lower() in user["name"].lower():
-        #         after_name_filter.append(user)
-        # filtered_users = after_name_filter
-    
-    if job_filter:
-        search_params['job'] = job_filter
-        filtered_users = [u for u in filtered_users if u['job'].lower() == job_filter.lower()]
-    
-    # Get specific user by index
-    if index_param:
+    query = Task.query
+    if search_params['task']:
+        query = query.filter(Task.task.ilike(f"%{search_params['task']}%"))
+
+    if search_params['priority']:
+        query = query.filter(Task.priority.ilike(search_params['priority']))
+
+    if search_params['category_id']:
         try:
-            index = int(index_param)
-            if 0 <= index < len(users_list):
-                search_params['index'] = index
-                filtered_users = [users_list[index]]
-            else:
-                filtered_users = []
+            category_id = int(search_params['category_id'])
+            query = query.filter_by(category_id=category_id)
         except ValueError:
-            filtered_users = []
-    
+            query = query.filter(Task.id < 0)
+
+    if search_params['index']:
+        try:
+            todo_id = int(search_params['index'])
+            query = query.filter_by(id=todo_id)
+        except ValueError:
+            query = query.filter(Task.id < 0)
+
+    filtered_todos = query.order_by(Task.id).all()
+    total_todos = Task.query.count()
+
     return render_template(
         "search.html",
-        filtered_users=filtered_users,
+        filtered_todos=filtered_todos,
+        total_todos=total_todos,
         search_params=search_params,
-        total_users=len(users_list)
+        categories=categories,
     )
 
-
-@app.route("/about")
-def about():
-    return render_template("about.html")
-
-# the below code is only needed if you're using this command to run the app: "python3 app.py"
-# if you run the app with "flask run", then the below code is not needed
-# Also, if you want to enable the debugger, run the app like this: "flask run --debug"
 if __name__ == "__main__":
     debug_flag = str(os.environ.get("DEBUG", False)).lower() in ("1", "true", "yes")
     app.run(debug=debug_flag)

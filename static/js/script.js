@@ -1,9 +1,9 @@
 // Modal functionality
 let deleteIndex = null;
 
-function confirmDelete(index, name) {
+function confirmDelete(index, task) {
   deleteIndex = index;
-  document.getElementById('userName').textContent = name;
+  document.getElementById('taskName').textContent = task;
   document.getElementById('deleteModal').style.display = 'block';
 }
 
@@ -11,7 +11,7 @@ function closeModal() {
   document.getElementById('deleteModal').style.display = 'none';
 }
 
-function deleteUser() {
+function deleteTodo() {
   document.getElementById('deleteForm').action = '/delete/' + deleteIndex;
   document.getElementById('deleteForm').submit();
 }
@@ -22,12 +22,12 @@ document.addEventListener('DOMContentLoaded', function() {
   document.querySelectorAll('.btn-delete').forEach(btn => {
     btn.addEventListener('click', function() {
       const index = this.dataset.index;
-      const name = this.dataset.name;
-      confirmDelete(index, name);
+      const task = this.dataset.task;
+      confirmDelete(index, task);
     });
   });
 
   // Modal buttons
   document.getElementById('noBtn').addEventListener('click', closeModal);
-  document.getElementById('yesBtn').addEventListener('click', deleteUser);
+  document.getElementById('yesBtn').addEventListener('click', deleteTodo);
 });

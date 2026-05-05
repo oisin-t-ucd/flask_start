@@ -1,33 +1,51 @@
-{% extends "base.html" %} 
-{% block title %}Home - User List{% endblock %} 
+{% extends "base.html" %}
+{% block title %}Home - To-Do List{% endblock %}
 {% block content %}
-<h1>User Directory</h1>
+<h1>Task List</h1>
 
 <div style="margin-bottom: 20px;">
   <a href="{{ url_for('search') }}" class="btn-edit" style="display: inline-block; padding: 10px 15px; background-color: #28a745; color: white; text-decoration: none; border-radius: 4px;">
-    🔍 Search/Filter Users
+    🔍 Search/Filter Tasks
   </a>
 </div>
 
 <div class="form-container">
   <form action="/" method="POST">
-    <input type="text" name="name" placeholder="Enter Name" required />
-    <input type="number" name="age" placeholder="Enter Age" required />
-    <input type="text" name="job" placeholder="Enter Job" />
-    <button type="submit" class="btn-add">Add User</button>
+    <input type="text" name="task" placeholder="Enter Task" required />
+    <select name="priority" required>
+      <option value="" disabled selected>Select Priority</option>
+      <option value="High">High</option>
+      <option value="Medium">Medium</option>
+      <option value="Low">Low</option>
+    </select>
+    <select name="status" required>
+      <option value="" disabled selected>Select Status</option>
+      <option value="Pending">Pending</option>
+      <option value="In Progress">In Progress</option>
+      <option value="Completed">Completed</option>
+    </select>
+    <select name="category_id" required>
+      <option value="" disabled selected>Select Category</option>
+      {% for category in categories %}
+      <option value="{{ category.id }}">{{ category.name }}</option>
+      {% endfor %}
+    </select>
+    <button type="submit" class="btn-add">Add Task</button>
   </form>
 </div>
-<ul class="user-list">
-  {% for user in users %}
+<ul class="todo-list">
+  {% for todo in todos %}
   <li>
-    <span class="user-info">
-      <a href="{{ url_for('user_profile', user_index=loop.index0) }}">
-        <strong>{{ user.name }}</strong>
+    <span class="todo-info">
+      <a href="{{ url_for('todo_detail', todo_index=todo.id) }}">
+        <strong>{{ todo.task }}</strong>
       </a>
-      ({{ user.age }})
+      <span style="color: #555;">&nbsp;| {{ todo.priority }} | {{ todo.status }} | {{ todo.category.name }}</span>
     </span>
-    <a class="btn-edit" href="{{ url_for('edit_user', user_index=loop.index0) }}">Edit</a>
-    <button class="btn-delete" data-index="{{ loop.index0 }}" data-name="{{ user.name }}">Delete</button>
+    <span>
+      <a class="btn-edit" href="{{ url_for('edit_todo', todo_index=todo.id) }}">Edit</a>
+      <button class="btn-delete" data-index="{{ todo.id }}" data-task="{{ todo.task }}">Delete</button>
+    </span>
   </li>
   {% endfor %}
 </ul>
@@ -35,7 +53,7 @@
 <!-- Delete Confirmation Modal -->
 <div id="deleteModal" class="modal">
   <div class="modal-content">
-    <p>Are you sure you want to delete <span id="userName"></span>?</p>
+    <p>Are you sure you want to delete <span id="taskName"></span>?</p>
     <button id="noBtn">No</button>
     <button id="yesBtn">Yes</button>
   </div>

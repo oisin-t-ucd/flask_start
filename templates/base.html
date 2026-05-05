@@ -1,32 +1,38 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>{% block title %}User Manager{% endblock %}</title>
-    <link
-      rel="stylesheet"
-      href="{{ url_for('static', filename='css/style.css') }}"
-    />
-  </head>
-  <body>
-    <nav class="navbar">
-      <div class="container">
-        <a href="{{ url_for('index') }}" class="logo">UserApp</a>
-        <ul class="nav-links">
-          <li><a href="{{ url_for('index') }}">Home</a></li>
-          <li><a href="{{ url_for('about') }}">About</a></li>
-        </ul>
-      </div>
-    </nav>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}To-Do Manager{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <header>
+        <nav>
+            <ul>
+                <!-- Updated navigation to reflect To-Do routes -->
+                <li><a href="{{ url_for('index') }}">My Tasks</a></li>
+                <li><a href="{{ url_for('search') }}">Search Tasks</a></li>
+            </ul>
+        </nav>
+    </header>
 
-    <main class="container">
+    <main>
+        <!-- Flash messages for task updates or deletions -->
+        {% with messages = get_flashed_messages() %}
+          {% if messages %}
+            <ul class="flashes">
+            {% for message in messages %}
+              <li>{{ message }}</li>
+            {% endfor %}
+            </ul>
+          {% endif %}
+        {% endwith %}
+
         {% block content %}
-         {% endblock %}
-        </main>
+        <!-- Child templates (index, edit, search) will inject content here -->
+        {% endblock %}
+    </main>
 
-    <footer>
-      <p>&copy; 2026 Flask Beginner Tutorial</p>
-    </footer>
-  </body>
+</body>
 </html>
